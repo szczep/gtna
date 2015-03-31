@@ -1,4 +1,8 @@
-package edu.pw.elka.gtna.graph;
+package edu.pw.elka.gtna.graph.impl;
+
+import edu.pw.elka.gtna.graph.Edge;
+import edu.pw.elka.gtna.graph.EdgeType;
+import edu.pw.elka.gtna.graph.Node;
 
 public class EdgeFactory {
 	
@@ -17,10 +21,10 @@ public class EdgeFactory {
         switch(type)
         {
             case SIMPLE:
-            e = new EdgeImpl<N>(EdgeType.SIMPLE);
+            e = new EdgeImpl<N>();
             break;
             case DIRECTED:
-            e = new EdgeImpl<N>(EdgeType.DIRECTED);
+            e = new DirectedEdgeImpl<N>();
             break;
             default:
             ;

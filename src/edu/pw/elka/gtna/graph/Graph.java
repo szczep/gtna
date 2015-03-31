@@ -12,14 +12,11 @@ public interface Graph<N extends Node,E extends Edge> {
 	Set<E> getEdges();
 	
 	
-	int removeEdge(E e);
-	int removeNode(N n);
+	boolean removeEdge(E e);
+	boolean removeNode(N n);
 	
 	
 	boolean addEdge(E e);
 	boolean addNode(N n);
-	
-	
-	boolean isDirected();
-	
+
 }

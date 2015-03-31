@@ -1,14 +1,14 @@
-package edu.pw.elka.gtna.graph;
+package edu.pw.elka.gtna.graph.impl;
+
+import edu.pw.elka.gtna.graph.Edge;
+import edu.pw.elka.gtna.graph.Node;
 
 public class EdgeImpl<N extends Node> implements Edge<N> {
 
 	N n1;
 	N n2;
 	
-	EdgeType type;
-	
-	EdgeImpl(EdgeType type){
-		this.type = type;
+	EdgeImpl(){
 	}
 	
 	EdgeImpl(N n1, N n2){
@@ -37,18 +37,14 @@ public class EdgeImpl<N extends Node> implements Edge<N> {
 	}
 
 	@Override
-	public boolean isDirected() {
-		return (type.equals(EdgeType.DIRECTED));
-	}
-
-	@Override
-	public N getAdjacent(N node) {
-		if (n1.equals(node)){
+	public N getN(N node) {
+		if (node.equals(n1)) {
 			return n2;
-		} else if (n2.equals(node)) {
+		} else if (node.equals(n2)){
 			return n1;
 		}
 		return null;
 	}
+
 
 }

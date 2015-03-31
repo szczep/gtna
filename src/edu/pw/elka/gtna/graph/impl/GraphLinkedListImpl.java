@@ -1,8 +1,7 @@
 package edu.pw.elka.gtna.graph.impl;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,11 +14,18 @@ public class GraphLinkedListImpl<N extends Node,E extends Edge<N>> implements Gr
 	Map<N,Set<E>> graphLinkedListData;
 	
 	
+    GraphLinkedListImpl(){
+		graphLinkedListData = new LinkedHashMap<N,Set<E>>();
+	}
+	
+	/**
+	 * O(N)
+	 */
 	@Override
 	public Set<N> getNeighbours(N node) {
 		Set<N> neigbours = new LinkedHashSet<N>();
 		for (E edge: graphLinkedListData.get(node)){
-			neigbours.add(edge.getAdjacent(node));
+			neigbours.add(edge.getN(node));
 		}
 		return neigbours;
 	}
@@ -33,12 +39,18 @@ public class GraphLinkedListImpl<N extends Node,E extends Edge<N>> implements Gr
 		return graphLinkedListData.get(node).size();
 	}
 
-	
+	/**
+	 * O(N)
+	 */
 	@Override
 	public Set<N> getNodes() {
 		return new LinkedHashSet<N>(graphLinkedListData.keySet());
 	}
 
+	/**
+	 * O(E)
+	 * 
+	 */
 	@Override
 	public Set<E> getEdges() {
 		Set<E> edges = new LinkedHashSet<E>();
@@ -47,30 +59,46 @@ public class GraphLinkedListImpl<N extends Node,E extends Edge<N>> implements Gr
 		}
 		return edges;
 	}
-
+	
+	/**
+	 * O(1)
+	 * 
+	 */
 	@Override
-	public int removeEdge(Edge e) {
-		// TODO Auto-generated method stub
-		return 0;
+	public boolean removeEdge(E e) {
+		graphLinkedListData.get(e.getN1()).remove(e);
+		return graphLinkedListData.get(e.getN2()).remove(e);
 	}
-
+	
+	/**
+	 * O(E)
+	 * 
+	 */
 	@Override
-	public int removeNode(Node n) {
-		// TODO Auto-generated method stub
-		return 0;
+	public boolean removeNode(N n) {
+		
+		if (graphLinkedListData.containsKey(n)){
+			for(E edge: graphLinkedListData.get(n)) {
+				graphLinkedListData.get(edge.getN(n)).remove(edge);
+			}
+			graphLinkedListData.remove(n);
+			return true;
+		}
+		return false;
 	}
-
+	
+	/**
+	 * O(1)
+	 * 
+	 */
 	@Override
 	public boolean addEdge(E e) {
 		addNode(e.getN1());
 		addNode(e.getN2());
 		
 		if (!graphLinkedListData.get(e.getN1()).contains(e)) {
-			graphLinkedListData.get(e.getN1()).add(e);
-			
-			if (!e.isDirected()){
-				graphLinkedListData.get(e.getN2()).add(e);				
-			}
+			graphLinkedListData.get(e.getN1()).add(e);			
+			graphLinkedListData.get(e.getN2()).add(e);				
 			
 			return true;
 		}
@@ -79,20 +107,14 @@ public class GraphLinkedListImpl<N extends Node,E extends Edge<N>> implements Gr
 
 	/**
 	 * O(1)
+	 * 
 	 */
 	@Override
 	public boolean addNode(N n) {
 		if (!graphLinkedListData.containsKey(n)) {
-			graphLinkedListData.put((N) n, new LinkedHashSet<E>());
+			graphLinkedListData.put(n, new LinkedHashSet<E>());
 			return true;
 		}
-		return false;
-	}
-
-
-	@Override
-	public boolean isDirected() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 

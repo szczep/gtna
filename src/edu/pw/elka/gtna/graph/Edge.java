@@ -8,6 +8,5 @@ public interface Edge<N extends Node> {
 	void setN1(N n1);
 	void setN2(N n2);
 	
-	N getAdjacent(N node);
-	boolean isDirected();
+	N getN(N n);
 }
