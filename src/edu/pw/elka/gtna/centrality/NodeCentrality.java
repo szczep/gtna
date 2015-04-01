@@ -1,8 +1,8 @@
-package edu.pw.elka.gtna.centrality.impl;
+package edu.pw.elka.gtna.centrality;
 
-import edu.pw.elka.gtna.graph.Edge;
-import edu.pw.elka.gtna.graph.Graph;
-import edu.pw.elka.gtna.graph.Node;
+import edu.pw.elka.gtna.graph.interfaces.Edge;
+import edu.pw.elka.gtna.graph.interfaces.Graph;
+import edu.pw.elka.gtna.graph.interfaces.Node;
 
 
 

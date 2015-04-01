@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.pw.elka.gtna.centrality.betweenness.impl;
+package edu.pw.elka.gtna.centrality.betweenness;
 
 
 import java.util.HashMap;
@@ -12,10 +12,10 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Stack;
 
-import edu.pw.elka.gtna.centrality.impl.NodeCentrality;
-import edu.pw.elka.gtna.graph.Edge;
-import edu.pw.elka.gtna.graph.Graph;
-import edu.pw.elka.gtna.graph.Node;
+import edu.pw.elka.gtna.centrality.NodeCentrality;
+import edu.pw.elka.gtna.graph.interfaces.Edge;
+import edu.pw.elka.gtna.graph.interfaces.Graph;
+import edu.pw.elka.gtna.graph.interfaces.Node;
 
 
 /**

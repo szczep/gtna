@@ -1,4 +1,4 @@
-package edu.pw.elka.gtna.graph;
+package edu.pw.elka.gtna.graph.interfaces;
 
 public interface Node  {
 

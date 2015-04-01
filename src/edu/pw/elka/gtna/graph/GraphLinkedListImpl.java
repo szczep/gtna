@@ -1,13 +1,13 @@
-package edu.pw.elka.gtna.graph.impl;
+package edu.pw.elka.gtna.graph;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import edu.pw.elka.gtna.graph.Edge;
-import edu.pw.elka.gtna.graph.Graph;
-import edu.pw.elka.gtna.graph.Node;
+import edu.pw.elka.gtna.graph.interfaces.Edge;
+import edu.pw.elka.gtna.graph.interfaces.Graph;
+import edu.pw.elka.gtna.graph.interfaces.Node;
 
 public class GraphLinkedListImpl<N extends Node,E extends Edge<N>> implements Graph<N,E> {
 

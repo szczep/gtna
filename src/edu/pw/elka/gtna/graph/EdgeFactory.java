@@ -1,8 +1,8 @@
-package edu.pw.elka.gtna.graph.impl;
+package edu.pw.elka.gtna.graph;
 
-import edu.pw.elka.gtna.graph.Edge;
-import edu.pw.elka.gtna.graph.EdgeType;
-import edu.pw.elka.gtna.graph.Node;
+import edu.pw.elka.gtna.graph.interfaces.Edge;
+import edu.pw.elka.gtna.graph.interfaces.EdgeType;
+import edu.pw.elka.gtna.graph.interfaces.Node;
 
 public class EdgeFactory {
 	

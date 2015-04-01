@@ -1,4 +1,4 @@
-package edu.pw.elka.gtna.graph.impl;
+package edu.pw.elka.gtna.graph;
 
 abstract public class NodeIml {
 	   public abstract boolean equals(Object other);
