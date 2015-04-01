@@ -2,7 +2,7 @@ package edu.pw.elka.gtna.graph;
 
 import java.util.Set;
 
-public interface Graph<N extends Node,E extends Edge> {
+public interface Graph<N extends Node,E extends Edge<N>> {
 
 	
 	Set<N> getNeighbours(N node);
