@@ -27,16 +27,11 @@ abstract public class AbstractCentrality<T,N extends Node,E extends Edge<N>> imp
 	public double getCentrality (T element){
 		return centralities.get(element);
 	}	
-	
-	
-	/**
-	 * This function computes centralities for all nodes
-	 */
-	abstract public  void computeCentrality();
+
 
     public void printCentralities(){
         for(T element: centralities.keySet()){
-            System.out.println(element+" "+centralities.get(element));
+            System.out.println(element+"\t"+centralities.get(element));
         }
     }
 

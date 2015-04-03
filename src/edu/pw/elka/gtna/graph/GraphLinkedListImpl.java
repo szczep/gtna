@@ -5,6 +5,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import edu.pw.elka.gtna.graph.creator.interfaces.GraphCreator;
 import edu.pw.elka.gtna.graph.interfaces.Edge;
 import edu.pw.elka.gtna.graph.interfaces.Graph;
 import edu.pw.elka.gtna.graph.interfaces.Node;
@@ -18,6 +19,14 @@ public class GraphLinkedListImpl<N extends Node,E extends Edge<N>> implements Gr
 		graphLinkedListData = new LinkedHashMap<N,Set<E>>();
 	}
 	
+    
+    GraphLinkedListImpl(GraphCreator<E> gc){
+    	this();
+		for (E e: gc){
+			addEdge(e);
+		}
+	}
+    
 	/**
 	 * O(N)
 	 */
