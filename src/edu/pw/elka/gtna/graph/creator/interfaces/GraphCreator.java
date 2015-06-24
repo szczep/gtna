@@ -10,11 +10,10 @@ import edu.pw.elka.gtna.graph.interfaces.Node;
 
 
 /**
- * @author Piotr Lech Szczepaï¿½ski
+ * @author Piotr Lech Szczepañski
  * @author P.Szczepanski@ii.pw.edu.pl 
  *
  */
 public interface GraphCreator<E extends Edge<? extends Node>> extends Iterable<E>, Iterator<E>{
 
-	
 }

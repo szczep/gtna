@@ -128,6 +128,18 @@ public class GraphLinkedListImpl<N extends Node,E extends Edge<N>> implements Gr
 	}
 
 
+	@Override
+	public int getNodesNumber() {
+		return graphLinkedListData.keySet().size();
+	}
+
+
+	@Override
+	public int getEdgesNumber() {
+		return getEdges().size();
+	}
+
+
 
 
 }

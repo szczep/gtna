@@ -9,7 +9,7 @@ import java.util.Iterator;
 
 
 /**
- * @author Piotr Lech Szczepaï¿½ski
+ * @author Piotr Lech Szczepañski
  * @author P.Szczepanski@ii.pw.edu.pl 
  *
  */

@@ -11,6 +11,8 @@ public interface Graph<N extends Node,E extends Edge<N>> {
 	Set<N> getNodes();
 	Set<E> getEdges();
 	
+	int getNodesNumber();
+	int getEdgesNumber();
 	
 	boolean removeEdge(E e);
 	boolean removeNode(N n);
