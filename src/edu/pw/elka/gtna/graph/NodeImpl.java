@@ -26,7 +26,6 @@ public class NodeImpl extends AbstractNode {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		@SuppressWarnings("unchecked")
 		NodeImpl other = (NodeImpl) obj;
 		
 		if (label == null || other.label == null)

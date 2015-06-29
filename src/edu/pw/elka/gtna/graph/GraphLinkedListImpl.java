@@ -140,6 +140,16 @@ public class GraphLinkedListImpl<N extends Node,E extends Edge<N>> implements Gr
 	}
 
 
+	@Override
+	public boolean removeEdges(N n) {
+		if (graphLinkedListData.containsKey(n)){
+			graphLinkedListData.get(n).clear();
+			return true;
+		}
+		return false;
+	}
+
+
 
 
 }

@@ -1,11 +1,11 @@
-package edu.pw.elka.gtna.graph.evaluator;
-
+package edu.pw.elka.gtna.centrality.closeness;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 
+import edu.pw.elka.gtna.centrality.NodeCentrality;
 import edu.pw.elka.gtna.graph.interfaces.Edge;
 import edu.pw.elka.gtna.graph.interfaces.Graph;
 import edu.pw.elka.gtna.graph.interfaces.Node;
@@ -14,28 +14,26 @@ import edu.pw.elka.gtna.graph.interfaces.Node;
 /**
  * @author Piotr Lech Szczepañski
  * @author P.Szczepanski@ii.pw.edu.pl 
- * 
- * This class evaluates network with the average inverse geodesic measure (also known as network Efficiency)
  *
  */
-public class IGMEvaluator<N extends Node,E extends Edge<N>> extends AbstractGraphEvaluator<N,E> {
+abstract public class NodeClosenessCentrality<N extends Node> extends NodeCentrality<N,Edge<N>>{
 
+	
     Queue<N> queue; 
     Map<N, Double> dist;
-    Map<N,Integer> sigma;
-    
+	
 	/**
 	 * @param graph
 	 */
-	public IGMEvaluator(Graph<N,E> graph) {
+	public NodeClosenessCentrality(Graph<N,Edge<N>> graph) {
 		super(graph);
         dist = new HashMap<N,Double>();
         queue = new LinkedList<N>();
-        sigma = new HashMap<N,Integer>();
 	}
 
-   
-    protected double getDistance(int node){
+	abstract protected double fDistance(double d);
+	
+    protected double getDistance(N node){
     	return dist.get(node);
     }
     
@@ -43,11 +41,9 @@ public class IGMEvaluator<N extends Node,E extends Edge<N>> extends AbstractGrap
     protected void singleSourceBFS(N source){
 	    for (N vert: graph.getNodes()) {
             dist.put(vert, Double.MAX_VALUE);
-            sigma.put(vert, 0);
             queue.clear();
 	    }
 	    dist.put(source,0.0);
-	    sigma.put(source, 1);
 	    queue.add(source);
 	    
         while (!queue.isEmpty()) {
@@ -57,33 +53,28 @@ public class IGMEvaluator<N extends Node,E extends Edge<N>> extends AbstractGrap
                     dist.put(w, dist.get(v) + 1);
                     queue.offer(w);
                 }
-                if (dist.get(w) == dist.get(v) + 1) {
-                    sigma.put(w, sigma.get(w) + sigma.get(v));
-                }
             }
         }
     }
 
-
+	/* (non-Javadoc)
+	 * @see edu.pw.elka.gtsna.centrality.AbstractCentrality#computeCentrality()
+	 */
 	@Override
-	public double evaluate() {
+    public void computeCentrality(){
+		double sumDistance = 0.0;
 		
-		double averageInverseDistrance = 0.0;
-
-		for (N v: graph.getNodes()){
-			singleSourceBFS(v);
+		for (N node: graph.getNodes()){
+			sumDistance = 0.0;
+			singleSourceBFS(node);
 			
-			// We sum up all distances between v and u
 			for (N u: graph.getNodes()){
-				if (u != v) {
-					averageInverseDistrance+=1.0/dist.get(u);
-				} 
+				if (node !=u)
+					sumDistance+=fDistance(getDistance(u));
 			}
 			
+    		centralities.put(node, sumDistance) ;
 		}
-
-		return (averageInverseDistrance)/(graph.getNodesNumber()*(graph.getNodesNumber()-1));
-
-	}
+    }
 
 }

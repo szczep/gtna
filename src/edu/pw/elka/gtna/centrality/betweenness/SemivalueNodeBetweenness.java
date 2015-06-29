@@ -16,15 +16,12 @@
 */
 package edu.pw.elka.gtna.centrality.betweenness;
 
-import java.math.BigInteger;
-import java.math.RoundingMode;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import edu.pw.elka.gtna.graph.interfaces.Edge;
 import edu.pw.elka.gtna.graph.interfaces.Graph;
 import edu.pw.elka.gtna.graph.interfaces.Node;
-import edu.pw.elka.gtna.utils.Factorial;
 
 /**
  * @author Piotr Lech Szczepañski
@@ -38,14 +35,12 @@ public abstract class SemivalueNodeBetweenness<N extends Node> extends Parametri
 	
 	abstract protected double distribution(int k);
 	
-	private double calculations[];
 
 	/**
 	 * @param graph
 	 */
 	public SemivalueNodeBetweenness(Graph<N, Edge<N>> graph) {
 		super(graph);
-		calculations = new double[graph.getNodesNumber()];
 	}
 
 	/* (non-Javadoc)
@@ -86,7 +81,7 @@ public abstract class SemivalueNodeBetweenness<N extends Node> extends Parametri
         }   
 		
 		for (int i=1; i<= graph.getNodesNumber(); i++) {
-			this.k = i; System.out.println(k);
+			this.k = i; 
 	        for (N vertex: graph.getNodes()){
 	            centralities.put(vertex, 0.0);
 	        }   

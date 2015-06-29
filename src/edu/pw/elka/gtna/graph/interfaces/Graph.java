@@ -15,10 +15,11 @@ public interface Graph<N extends Node,E extends Edge<N>> {
 	int getEdgesNumber();
 	
 	boolean removeEdge(E e);
+	boolean removeEdges(N n);
 	boolean removeNode(N n);
-	
-	
+		
 	boolean addEdge(E e);
 	boolean addNode(N n);
-
+	
+	
 }

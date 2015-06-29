@@ -1,5 +1,7 @@
 package edu.pw.elka.gtna.centrality.interfaces;
 
+import java.util.Set;
+
 public interface Centrality<T> {
 	
 	/**
@@ -10,5 +12,7 @@ public interface Centrality<T> {
 	public double getCentrality (T element);
 
     public void printCentralities();
+    
+    public Set<T> getElements();
     
 }

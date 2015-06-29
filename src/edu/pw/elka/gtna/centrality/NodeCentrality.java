@@ -1,5 +1,7 @@
 package edu.pw.elka.gtna.centrality;
 
+import java.util.Set;
+
 import edu.pw.elka.gtna.graph.interfaces.Edge;
 import edu.pw.elka.gtna.graph.interfaces.Graph;
 import edu.pw.elka.gtna.graph.interfaces.Node;
@@ -17,5 +19,7 @@ public abstract class NodeCentrality<N extends Node, E extends Edge<N>> extends 
 		super(graph);
 	}
 	
-
+    public Set<N> getElements(){
+    	return graph.getNodes();
+    }
 }
