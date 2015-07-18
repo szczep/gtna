@@ -8,14 +8,21 @@ import java.util.concurrent.TimeUnit;
 
 import edu.pw.elka.gtna.centrality.betweenness.BetweennessCentrality;
 import edu.pw.elka.gtna.centrality.betweenness.SemivalueNodeBetweenness;
-import edu.pw.elka.gtna.centrality.closeness.NodeClosenessCentrality;
+import edu.pw.elka.gtna.centrality.closeness.ClosenessCentrality;
 import edu.pw.elka.gtna.centrality.degree.DegreeCentrality;
 import edu.pw.elka.gtna.centrality.interfaces.Centrality;
 import edu.pw.elka.gtna.graph.GraphFactory;
 import edu.pw.elka.gtna.graph.creator.ScaleFreeGraphGenerator;
+import edu.pw.elka.gtna.graph.evaluator.AverageDegreeEvaluator;
+import edu.pw.elka.gtna.graph.evaluator.AverageShortestPathsEvaluator;
+import edu.pw.elka.gtna.graph.evaluator.FragmentationRatioEvaluator;
+import edu.pw.elka.gtna.graph.evaluator.GlobalClusteringCoefficientEvaluator;
 import edu.pw.elka.gtna.graph.evaluator.IGMEvaluator;
+import edu.pw.elka.gtna.graph.evaluator.LargestComponentEvaluator;
+import edu.pw.elka.gtna.graph.evaluator.NumberOfLinksEvaluator;
 import edu.pw.elka.gtna.graph.interfaces.Edge;
 import edu.pw.elka.gtna.graph.interfaces.Graph;
+import edu.pw.elka.gtna.graph.interfaces.GraphEvaluator;
 import edu.pw.elka.gtna.graph.interfaces.GraphType;
 import edu.pw.elka.gtna.graph.interfaces.Node;
 import edu.pw.elka.gtna.ranking.Ranking;
@@ -50,20 +57,23 @@ public class RandomFailurePerformer extends AbstractTester {
 	    final int threads = Integer.parseInt(args[5]) ;
 	    final int graphs = Integer.parseInt(args[6]) ;
 	    
-	    final Agregator[] distancesB = new Agregator[graphSize+1];
-	    final Agregator[] distancesSV = new Agregator[graphSize+1];
+	    final Agregator[][] distancesB = new Agregator[6][graphSize+1];
+	    final Agregator[][] distancesSV = new Agregator[6][graphSize+1];
 	    
-	    final Agregator[] distancesD = new Agregator[graphSize+1];
-	    final Agregator[] distancesC = new Agregator[graphSize+1];
+	    final Agregator[][] distancesD = new Agregator[6][graphSize+1];
+	    final Agregator[][] distancesC = new Agregator[6][graphSize+1];
+	    
+
 
 	    for (int i=0; i<=graphSize; i++){
-	    	distancesB[i]= new Agregator();
-	    	distancesSV[i]= new Agregator();
-	    	distancesD[i]= new Agregator();
-	    	distancesC[i]= new Agregator();
-	    }
+		    for (int j=0; j<6; j++){
+		    	distancesB[j][i]= new Agregator();
+		    	distancesSV[j][i]= new Agregator();
+		    	distancesD[j][i]= new Agregator();
+		    	distancesC[j][i]= new Agregator();
+		    }
 		  
-
+	    }
 		  for (int ii=1; ii<=graphs; ii++) {
 			// System.out.println("graph: "+ii+"/"+graphs);
 		  
@@ -74,8 +84,22 @@ public class RandomFailurePerformer extends AbstractTester {
 			final Graph<Node,Edge<Node>> gr  = 
 					GraphFactory.<Node,Edge<Node>>newSimpleInstance(new ScaleFreeGraphGenerator(graphSize, (int)Math.sqrt(graphSize)), GraphType.SIMPLE);
 			
-			IGMEvaluator<Node,Edge<Node>> aD = new IGMEvaluator<Node,Edge<Node>>(gr);
-			final double mainD = aD.evaluate();	
+
+			GraphEvaluator averageShortestPaths = new AverageShortestPathsEvaluator<Node,Edge<Node>>(gr);
+			GraphEvaluator clusteringCoefficient = new GlobalClusteringCoefficientEvaluator<Node,Edge<Node>>(gr);
+			GraphEvaluator fragmentationRatio = new FragmentationRatioEvaluator<Node,Edge<Node>>(gr);
+			GraphEvaluator IGMEvaluator = new IGMEvaluator<Node,Edge<Node>>(gr);
+			GraphEvaluator largestComponent = new LargestComponentEvaluator<Node,Edge<Node>>(gr);
+			GraphEvaluator numberOfLinks = new NumberOfLinksEvaluator<Node,Edge<Node>>(gr);
+
+			final double[] main = new double[6];
+			main[0] = averageShortestPaths.evaluate();
+			main[1] = clusteringCoefficient.evaluate();
+			main[2] = fragmentationRatio.evaluate();
+			main[3] = IGMEvaluator.evaluate();
+			main[4] = largestComponent.evaluate();
+			main[5] = numberOfLinks.evaluate();
+											
 			
 			Centrality<Node> nB = new BetweennessCentrality<Node>(gr);
 			nB.computeCentrality();
@@ -85,18 +109,17 @@ public class RandomFailurePerformer extends AbstractTester {
 			nD.computeCentrality();
 			final Ranking<Node> rD = new Ranking<Node>(nD);
 			
-			Centrality<Node> nC = new NodeClosenessCentrality<Node>(gr){
-
+			Centrality<Node> nC = new ClosenessCentrality<Node>(gr){
 				@Override
 				protected double fDistance(double d) {
 					if (d==0) return 0;
 					return 1/d;
-				}
-				
+				}				
 			};
 			nC.computeCentrality();
 			final Ranking<Node> rC = new Ranking<Node>(nC);
 
+			
 			executorService = Executors.newFixedThreadPool(threads);
 		    final Semaphore available = new Semaphore(threads);
 			
@@ -110,7 +133,7 @@ public class RandomFailurePerformer extends AbstractTester {
 				final int iif = ii;
 				executorService.execute(new Runnable() {
 				    public void run() {
-
+		    	
 				    	Centrality<Node> PSV = new SemivalueNodeBetweenness<Node>(gr){
 							@Override
 							protected double distribution(int k){
@@ -125,10 +148,10 @@ public class RandomFailurePerformer extends AbstractTester {
 						
 						//Ranking.displayRankings(r1, r2);
 						
-						double Bdist  = 0.0;					
-						double SVdist  = 0.0;
-						double Dist  = 0.0;					
-						double Cdist  = 0.0;
+						double[] B	= new double[6];			
+						double[] SV	= new double[6];
+						double[] D	= new double[6];
+						double[] C	= new double[6];
 				
 						
 						RandomSubset<Node> rs = new RandomSubset<Node>(gr.getNodes());
@@ -160,19 +183,19 @@ public class RandomFailurePerformer extends AbstractTester {
 							}
 							
 							for(Node node: failers){
-								if ( ( (((double)rB.getPosition(node)*(double)rB.getPosition(node))/(gr.getNodesNumber()*gr.getNodesNumber())) > rand.nextDouble()) ){
+								if ( (((double)rB.getPosition(node))/(gr.getNodesNumber())) > rand.nextDouble() ) {
 									grB.removeEdges(node);
 								}
 								
-								if ( ( (((double)rPSV.getPosition(node)*(double)rPSV.getPosition(node))/(gr.getNodesNumber()*gr.getNodesNumber())) > rand.nextDouble()) ){
+								if ( ( (((double)rPSV.getPosition(node))/(gr.getNodesNumber())) > rand.nextDouble() ) ){
 									grSV.removeEdges(node);
 								}
 								
-								if ( ( (((double)rD.getPosition(node)*(double)rD.getPosition(node))/(gr.getNodesNumber()*gr.getNodesNumber())) > rand.nextDouble()) ){
+								if ( ( (((double)rD.getPosition(node))/(gr.getNodesNumber())) > rand.nextDouble() ) ){
 									grD.removeEdges(node);
 								}
 								
-								if ( ( (((double)rC.getPosition(node)*(double)rC.getPosition(node))/(gr.getNodesNumber()*gr.getNodesNumber())) > rand.nextDouble()) ){
+								if ( ( (((double)rC.getPosition(node))/(gr.getNodesNumber())) > rand.nextDouble() ) ){
 									grC.removeEdges(node);
 								}
 								
@@ -186,30 +209,77 @@ public class RandomFailurePerformer extends AbstractTester {
 //								}
 				
 							}
-							IGMEvaluator<Node,Edge<Node>> dB = new IGMEvaluator<Node,Edge<Node>>(grB);
-							IGMEvaluator<Node,Edge<Node>> dSV = new IGMEvaluator<Node,Edge<Node>>(grSV);
-							IGMEvaluator<Node,Edge<Node>> dD = new IGMEvaluator<Node,Edge<Node>>(grC);
-							IGMEvaluator<Node,Edge<Node>> dC = new IGMEvaluator<Node,Edge<Node>>(grD);
-
-//							Bdist += (mainD-dB.evaluate());
-//							SVdist  += (mainD-dSV.evaluate());							
-//							Dist  += (mainD-dD.evaluate());					
-//							Cdist  += (mainD-dC.evaluate());
 							
-							Bdist += (dB.evaluate()/mainD)*100;
-							SVdist  += (dSV.evaluate()/mainD)*100;							
-							Dist  += (dD.evaluate()/mainD)*100;					
-							Cdist  += (dC.evaluate()/mainD)*100;
+							GraphEvaluator averageDegreeB = new AverageDegreeEvaluator<Node,Edge<Node>>(grB);
+							GraphEvaluator clusteringCoefficientB = new GlobalClusteringCoefficientEvaluator<Node,Edge<Node>>(grB);
+							GraphEvaluator fragmentationRatioB = new FragmentationRatioEvaluator<Node,Edge<Node>>(grB);
+							GraphEvaluator IGMEvaluatorB = new IGMEvaluator<Node,Edge<Node>>(grB);
+							GraphEvaluator largestComponentB = new LargestComponentEvaluator<Node,Edge<Node>>(grB);
+							GraphEvaluator numberOfLinksB = new NumberOfLinksEvaluator<Node,Edge<Node>>(grB);
 							
-							//rs.setSize(rand.nextInt((b2-a2))+a2);
+							B[0] += averageDegreeB.evaluate();
+							B[1] += clusteringCoefficientB.evaluate();
+							B[2] += fragmentationRatioB.evaluate();
+							B[3] += IGMEvaluatorB.evaluate();
+							B[4] += largestComponentB.evaluate();
+							B[5] += numberOfLinksB.evaluate();
+																						
 							
+							GraphEvaluator averageDegreeSV = new AverageDegreeEvaluator<Node,Edge<Node>>(grSV);
+							GraphEvaluator clusteringCoefficientSV = new GlobalClusteringCoefficientEvaluator<Node,Edge<Node>>(grSV);
+							GraphEvaluator fragmentationRatioSV = new FragmentationRatioEvaluator<Node,Edge<Node>>(grSV);
+							GraphEvaluator IGMEvaluatorSV = new IGMEvaluator<Node,Edge<Node>>(grSV);
+							GraphEvaluator largestComponentSV = new LargestComponentEvaluator<Node,Edge<Node>>(grSV);
+							GraphEvaluator numberOfLinksSV = new NumberOfLinksEvaluator<Node,Edge<Node>>(grSV);
+							
+							
+							SV[0] += averageDegreeSV.evaluate();
+							SV[1] += clusteringCoefficientSV.evaluate();
+							SV[2] += fragmentationRatioSV.evaluate();
+							SV[3] += IGMEvaluatorSV.evaluate();
+							SV[4] += largestComponentSV.evaluate();
+							SV[5] += numberOfLinksSV.evaluate();
+							
+							
+							GraphEvaluator averageDegreeC = new AverageDegreeEvaluator<Node,Edge<Node>>(grC);
+							GraphEvaluator clusteringCoefficientC = new GlobalClusteringCoefficientEvaluator<Node,Edge<Node>>(grC);
+							GraphEvaluator fragmentationRatioC = new FragmentationRatioEvaluator<Node,Edge<Node>>(grC);
+							GraphEvaluator IGMEvaluatorC = new IGMEvaluator<Node,Edge<Node>>(grC);
+							GraphEvaluator largestComponentC = new LargestComponentEvaluator<Node,Edge<Node>>(grC);
+							GraphEvaluator numberOfLinksC = new NumberOfLinksEvaluator<Node,Edge<Node>>(grC);
+							
+							
+							C[0] += averageDegreeC.evaluate();
+							C[1] += clusteringCoefficientC.evaluate();
+							C[2] += fragmentationRatioC.evaluate();
+							C[3] += IGMEvaluatorC.evaluate();
+							C[4] += largestComponentC.evaluate();
+							C[5] += numberOfLinksC.evaluate();
+							
+							
+							GraphEvaluator averageDegreeD = new AverageDegreeEvaluator<Node,Edge<Node>>(grD);
+							GraphEvaluator clusteringCoefficientD = new GlobalClusteringCoefficientEvaluator<Node,Edge<Node>>(grD);
+							GraphEvaluator fragmentationRatioD = new FragmentationRatioEvaluator<Node,Edge<Node>>(grD);
+							GraphEvaluator IGMEvaluatorD = new IGMEvaluator<Node,Edge<Node>>(grD);
+							GraphEvaluator largestComponentD = new LargestComponentEvaluator<Node,Edge<Node>>(grD);
+							GraphEvaluator numberOfLinksD = new NumberOfLinksEvaluator<Node,Edge<Node>>(grD);
+							
+							D[0] += averageDegreeD.evaluate();
+							D[1] += clusteringCoefficientD.evaluate();
+							D[2] += fragmentationRatioD.evaluate();
+							D[3] += IGMEvaluatorD.evaluate();
+							D[4] += largestComponentD.evaluate();
+							D[5] += numberOfLinksD.evaluate();
 							
 						}
 						//System.out.println("("+a+","+b2+") "+nf.format(Bdist/iterations)+" vs "+nf.format(SVdist/iterations)+"      "+nf.format(Bpaths/iterations)+" vs "+nf.format(SVpaths/iterations));
-						distancesB[b2].observe(Bdist/iterations);
-						distancesSV[b2].observe(SVdist/iterations);
-						distancesD[b2].observe(Dist/iterations);
-						distancesC[b2].observe(Cdist/iterations);
+						
+						for (int j=0; j<6; j++){
+							distancesB[j][b2].observe(B[j]/iterations);
+							distancesSV[j][b2].observe(SV[j]/iterations);
+							distancesD[j][b2].observe(D[j]/iterations);
+							distancesC[j][b2].observe(C[j]/iterations);
+						}
 						
 						available.release();
 				    }
@@ -226,15 +296,20 @@ public class RandomFailurePerformer extends AbstractTester {
 				}
 			
 		  }
+
 		  
-		  
-		for (int i=2; i<=graphSize; i+=bStep){
+		for (int i1=2; i1<=graphSize; i1+=bStep){
 //			System.out.println(i+" distancesB: "+sixDForm.format(distancesB[i].getMean())+" "+sixDForm.format(distancesB[i].getLowerBound(75))+" "+sixDForm.format(distancesB[i].getUpperBound(75)));
 //			System.out.println(i+" distancesSV: "+sixDForm.format(distancesSV[i].getMean())+" "+sixDForm.format(distancesSV[i].getLowerBound(75))+" "+sixDForm.format(distancesSV[i].getUpperBound(75)));
-			System.out.println(i+" "+sixDForm.format(distancesB[i].getMean())+" "+sixDForm.format(distancesB[i].getLowerBound(75))+" "+sixDForm.format(distancesB[i].getUpperBound(75)) +
-					" "+sixDForm.format(distancesSV[i].getMean())+" "+sixDForm.format(distancesSV[i].getLowerBound(75))+" "+sixDForm.format(distancesSV[i].getUpperBound(75)) + 
-					" "+sixDForm.format(distancesD[i].getMean())+" "+sixDForm.format(distancesD[i].getLowerBound(75))+" "+sixDForm.format(distancesD[i].getUpperBound(75)) + 
-					" "+sixDForm.format(distancesC[i].getMean())+" "+sixDForm.format(distancesC[i].getLowerBound(75))+" "+sixDForm.format(distancesC[i].getUpperBound(75)));
+			System.out.print(i1+" ");
+			for (int j=0; j<6; j++){
+				System.out.print(sixDForm.format(distancesB[j][i1].getMean())+" "+sixDForm.format(distancesB[j][i1].getLowerBound(75))+" "+sixDForm.format(distancesB[j][i1].getUpperBound(75)) +
+						" "+sixDForm.format(distancesSV[j][i1].getMean())+" "+sixDForm.format(distancesSV[j][i1].getLowerBound(75))+" "+sixDForm.format(distancesSV[j][i1].getUpperBound(75)) + 
+						" "+sixDForm.format(distancesD[j][i1].getMean())+" "+sixDForm.format(distancesD[j][i1].getLowerBound(75))+" "+sixDForm.format(distancesD[j][i1].getUpperBound(75)) + 
+						" "+sixDForm.format(distancesC[j][i1].getMean())+" "+sixDForm.format(distancesC[j][i1].getLowerBound(75))+" "+sixDForm.format(distancesC[j][i1].getUpperBound(75))+" ");
+
+			}				System.out.println();
+
 		}
 		  
 		}

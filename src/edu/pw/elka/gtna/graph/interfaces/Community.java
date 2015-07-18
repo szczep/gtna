@@ -8,4 +8,6 @@ public interface Community<N extends Node> extends  Iterable<N> {
 	
 	Set<N> getNodes();
 	void addNode(N node);
+	boolean contains(N node);
+	int size();
 }

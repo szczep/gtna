@@ -149,7 +149,36 @@ public class GraphLinkedListImpl<N extends Node,E extends Edge<N>> implements Gr
 		return false;
 	}
 
+	@Override
+	public Set<N> getNeighbours(Set<N> subgraph){
+		Set<N> N = new LinkedHashSet<N>();
+		for(N i : subgraph) {
+			for (N u: getNeighbours(i)){
+				if (!subgraph.contains(u)) {
+					N.add(u);
+				}
+			}
+		}
+		return N;
+	}
 
+
+	@Override
+	public boolean hasEdge(E e) {
+		return graphLinkedListData.get(e.getN1()).contains(e);
+	}
+
+
+	@Override
+	public int getWeight(N n1, N n2) {
+		return 1;
+	}
+
+
+	@Override
+	public double getWeight(N n1) {
+		return 0;
+	}
 
 
 }

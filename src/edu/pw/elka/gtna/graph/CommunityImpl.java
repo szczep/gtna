@@ -13,7 +13,11 @@ public class CommunityImpl<N extends Node> implements Community<N> {
 	String label;
 	
 	public CommunityImpl(){
-		nodes = new LinkedHashSet<N>();
+		this.nodes = new LinkedHashSet<N>();
+	}
+	
+	public CommunityImpl(Set<N> nodes){
+		this.nodes = new LinkedHashSet<N>(nodes);
 	}
 	
 	
@@ -65,6 +69,22 @@ public class CommunityImpl<N extends Node> implements Community<N> {
 
 		
 		return label.equals(other.label);
+	}
+
+
+	@Override
+	public boolean contains(N node) {
+		return nodes.contains(node);
+	}
+
+	@Override
+	public int size() {
+		return nodes.size();
+	}
+	
+	@Override
+	public String toString() {
+		return nodes.toString();
 	}
 
 }

@@ -1,5 +1,7 @@
 package edu.pw.elka.gtna.graph;
 
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -15,6 +17,21 @@ public class CommunityStructureImp<N extends Node,E extends Edge<N>> implements 
 	protected Graph<N,E> graph;
 	Map<N,Community<N>> communitiesLinkedListData;
 	
+
+	/**
+	 * @param graph
+	 */
+	public CommunityStructureImp(Graph<N, E> graph) {
+		super();
+		this.graph = graph;
+		this.communitiesLinkedListData = new LinkedHashMap<N,Community<N>>();	
+		Community<N> C = new CommunityImpl<N>(graph.getNodes());
+		C.setLabel("GRAND");
+		for (N n : graph.getNodes()){
+			communitiesLinkedListData.put(n, C);
+		}
+	}
+
 	@Override
 	public Graph<N,E> getGraph() {
 		return graph;
@@ -38,15 +55,19 @@ public class CommunityStructureImp<N extends Node,E extends Edge<N>> implements 
 	}
 
 	@Override
-	public void addNode(Node node, Set community) {
+	public void addNode(Node node, Community<N> community) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public Community getNodesCommunity(Node node) {
-		// TODO Auto-generated method stub
-		return null;
+	public Community<N> getNodeCommunity(Node node) {
+		return communitiesLinkedListData.get(node);
+	}
+
+	@Override
+	public int size() {
+		return (new HashSet<Community<N>>(communitiesLinkedListData.values()).size());
 	}
 
 }

@@ -21,6 +21,9 @@ public class DirectedGraphExample {
 		Node n2 = NodeFactory.newInstance("2", NodeType.SIMPLE);
 		dg.addEdge((DirectedEdge<Node>)EdgeFactory.<Node>newInstance(n1, n2, EdgeType.DIRECTED));
 		
+		
+		
+		
 	}
 	
 }

@@ -11,8 +11,8 @@ public interface CommunityStructure<N extends Node,E extends Edge<N>> {
 	
 	Set<Community<N>> getCommunities();
 	void addCommunity(Community<N> community);
-	void addNode(N node, Set<N> community);	
-	public Community<N> getNodesCommunity(N node);
-	
+	void addNode(Node node, Community<N> community);
+	Community<N> getNodeCommunity(N node);
+	int size();
 
 }
