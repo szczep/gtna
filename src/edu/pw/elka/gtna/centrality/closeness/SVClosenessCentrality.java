@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import edu.pw.elka.graph.algorithms.Dijkstra;
 import edu.pw.elka.gtna.centrality.NodeCentrality;
+import edu.pw.elka.gtna.graph.algorithms.Dijkstra;
 import edu.pw.elka.gtna.graph.interfaces.Edge;
 import edu.pw.elka.gtna.graph.interfaces.Graph;
 import edu.pw.elka.gtna.graph.interfaces.Node;

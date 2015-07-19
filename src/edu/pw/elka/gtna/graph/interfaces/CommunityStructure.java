@@ -13,6 +13,7 @@ public interface CommunityStructure<N extends Node,E extends Edge<N>> {
 	void addCommunity(Community<N> community);
 	void addNode(Node node, Community<N> community);
 	Community<N> getNodeCommunity(N node);
+	Set<Community<N>> getNodeCommunities(N node);
 	int size();
 
 }

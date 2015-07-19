@@ -1,6 +1,5 @@
 package edu.pw.elka.gtna.graph;
 
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -12,23 +11,28 @@ import edu.pw.elka.gtna.graph.interfaces.Edge;
 import edu.pw.elka.gtna.graph.interfaces.Graph;
 import edu.pw.elka.gtna.graph.interfaces.Node;
 
-public class CommunityStructureImp<N extends Node,E extends Edge<N>> implements CommunityStructure<N,E>{
+public class OverlappingCommunityStructureImpl<N extends Node,E extends Edge<N>> implements CommunityStructure<N,E>{
 
-	protected Graph<N,E> graph;
-	Map<N,Community<N>> communitiesLinkedListData;
 	
-
+	protected Graph<N,E> graph;
+	Map<N,Set<Community<N>>> communitiesLinkedListData;
+	Set<Community<N>> communities;
+	
 	/**
 	 * @param graph
 	 */
-	public CommunityStructureImp(Graph<N, E> graph) {
+	public OverlappingCommunityStructureImpl(Graph<N, E> graph) {
 		super();
 		this.graph = graph;
-		this.communitiesLinkedListData = new LinkedHashMap<N,Community<N>>();	
+		this.communitiesLinkedListData = new LinkedHashMap<N,Set<Community<N>>>();	
+		this.communities = new LinkedHashSet<Community<N>>();
 		for (N n : graph.getNodes()){
 			Community<N> C = new CommunityImpl<N>(n);
 			C.setLabel(n.getLabel());
-			communitiesLinkedListData.put(n, C);
+			Set<Community<N>> Cn = new LinkedHashSet<Community<N>>();
+			Cn.add(C);
+			communitiesLinkedListData.put(n, Cn);
+			communities.add(C);
 		}
 	}
 
@@ -44,37 +48,35 @@ public class CommunityStructureImp<N extends Node,E extends Edge<N>> implements 
 
 	@Override
 	public Set<Community<N>> getCommunities() {
-		return  new LinkedHashSet<Community<N>>(communitiesLinkedListData.values());
+		return  new LinkedHashSet<Community<N>>(communities);
 	}
 
 	@Override
 	public void addCommunity(Community<N> community) {
 		for (N node: community){
-			communitiesLinkedListData.put(node, community);
+			communitiesLinkedListData.get(node).add(community);
 		}
+		communities.add(community);
 	}
 
 	@Override
 	public void addNode(Node node, Community<N> community) {
-		// TODO Auto-generated method stub
-		
+		// TODO Auto-generated method stub		
 	}
 
 	@Override
 	public Community<N> getNodeCommunity(Node node) {
-		return communitiesLinkedListData.get(node);
+		throw new UnsupportedOperationException("Invalid operation for Overlapping Community Structure Implementation.");
 	}
 
 	@Override
 	public int size() {
-		return (new HashSet<Community<N>>(communitiesLinkedListData.values()).size());
+		return communities.size();
 	}
 
 	@Override
 	public Set<Community<N>> getNodeCommunities(N node) {
-		Set<Community<N>> C = new LinkedHashSet<Community<N>>();
-		C.add(getNodeCommunity(node));
-		return C;
+		return new LinkedHashSet<Community<N>>(communitiesLinkedListData.get(node));
 	}
 
 }

@@ -1,6 +1,6 @@
 package edu.pw.elka.gtna.graph.evaluator;
 
-import edu.pw.elka.graph.algorithms.FindComponents;
+import edu.pw.elka.gtna.graph.algorithms.FindComponents;
 import edu.pw.elka.gtna.graph.interfaces.Edge;
 import edu.pw.elka.gtna.graph.interfaces.Graph;
 import edu.pw.elka.gtna.graph.interfaces.Node;

@@ -17,9 +17,14 @@ public class CommunityImpl<N extends Node> implements Community<N> {
 	}
 	
 	public CommunityImpl(Set<N> nodes){
-		this.nodes = new LinkedHashSet<N>(nodes);
+		this();
+		nodes.addAll(nodes);
 	}
 	
+	public CommunityImpl(N node){
+		this();
+		nodes.add(node);
+	}
 	
 	@Override
 	public Iterator<N> iterator() {

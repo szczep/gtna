@@ -3,7 +3,7 @@ package edu.pw.elka.gtna.graph.evaluator;
 
 import java.util.Set;
 
-import edu.pw.elka.graph.algorithms.FindComponents;
+import edu.pw.elka.gtna.graph.algorithms.FindComponents;
 import edu.pw.elka.gtna.graph.interfaces.Edge;
 import edu.pw.elka.gtna.graph.interfaces.Graph;
 import edu.pw.elka.gtna.graph.interfaces.GraphEvaluator;

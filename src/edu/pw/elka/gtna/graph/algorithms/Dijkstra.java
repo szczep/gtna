@@ -1,4 +1,4 @@
-package edu.pw.elka.graph.algorithms;
+package edu.pw.elka.gtna.graph.algorithms;
 
 import java.util.ArrayList;
 import java.util.Collections;

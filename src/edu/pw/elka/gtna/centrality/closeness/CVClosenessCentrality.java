@@ -15,7 +15,14 @@ import edu.pw.elka.gtna.graph.interfaces.Edge;
 import edu.pw.elka.gtna.graph.interfaces.Node;
 import edu.pw.elka.gtna.utils.MathFactors;
 
-public class CSClosenessCentrality<N extends Node, E extends Edge<N>> extends NodeCentrality<N, E> {
+/**
+ * 
+ * @author Piotr Szczepañski
+ *
+ * @param <N>
+ * @param <E>
+ */
+public class CVClosenessCentrality<N extends Node, E extends Edge<N>> extends NodeCentrality<N, E> {
 
 	Map<N,Map<N,Integer>> dist;
 	
@@ -29,7 +36,7 @@ public class CSClosenessCentrality<N extends Node, E extends Edge<N>> extends No
 	Set<Integer> distances;
 	
 	
-	public CSClosenessCentrality(CommunityStructure<N, E> communityStructure) {
+	public CVClosenessCentrality(CommunityStructure<N, E> communityStructure) {
 		super(communityStructure);
 		dist = new HashMap<N,Map<N,Integer>>();
 		distances = new HashSet<Integer>();
@@ -145,24 +152,24 @@ public class CSClosenessCentrality<N extends Node, E extends Edge<N>> extends No
 		for (N v: graph.getNodes()){			
 			centralities.put(v, 0.0);
 			for (N u: graph.getNodes()){
-				Community<N> Q = communityStructure.getNodeCommunity(v);
-				for (int k=0; k< communityStructure.size(); k++){
-					for (int l=0; l < Q.size(); l++){
-						int d = dist(v,u);
-
-						double MCplus = f(d)*( 	biNom(ComGrD.get(u).get(d),k)*biNom(NodGrD.get(u).get(Q).get(d),l) );
-						double MCminus = 0.0;
-						
-						for (int d1: distances)	{
-							if (d1 > d){
-								MCminus += f(d1)*( biNom(ComGrEqD.get(u).get(d1),k)*biNom(NodGrEqD.get(u).get(Q).get(d1),l) -  
-										biNom(ComGrD.get(u).get(d1),k)*biNom(NodGrD.get(u).get(Q).get(d1),l) );
+				for(Community<N> Q : communityStructure.getNodeCommunities(v))
+					for (int k=0; k< communityStructure.size(); k++){
+						for (int l=0; l < Q.size(); l++){
+							int d = dist(v,u);
+	
+							double MCplus = f(d)*( 	biNom(ComGrD.get(u).get(d),k)*biNom(NodGrD.get(u).get(Q).get(d),l) );
+							double MCminus = 0.0;
+							
+							for (int d1: distances)	{
+								if (d1 > d){
+									MCminus += f(d1)*( biNom(ComGrEqD.get(u).get(d1),k)*biNom(NodGrEqD.get(u).get(Q).get(d1),l) -  
+											biNom(ComGrD.get(u).get(d1),k)*biNom(NodGrD.get(u).get(Q).get(d1),l) );
+								}
 							}
+							centralities.put(v, centralities.get(v) + beta(k)*alpha(l,Q.size())*( (MCplus-MCminus)/
+									( (biNom(communityStructure.size()-1,k)*biNom(Q.size()-1,l)) ) ) );	
 						}
-						centralities.put(v, centralities.get(v) + beta(k)*alpha(l,Q.size())*( (MCplus-MCminus)/
-								( (biNom(communityStructure.size()-1,k)*biNom(Q.size()-1,l)) ) ) );	
-					}
-				}		
+					}		
 			}
 		}
 		
