@@ -67,7 +67,7 @@ public class CommunityImpl<N extends Node> implements Community<N> {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		NodeImpl other = (NodeImpl) obj;
+		CommunityImpl<N> other = (CommunityImpl<N>) obj;
 		
 		if (label == null || other.label == null)
 			return false;

@@ -10,7 +10,7 @@ import edu.pw.elka.gtna.graph.interfaces.Node;
  * @author P.Szczepanski@ii.pw.edu.pl 
  *
  */
-public abstract class GraphFileReader<E extends Edge<? extends Node>> extends FileParser<E> 
+abstract public class GraphFileReader<E extends Edge<? extends Node>> extends FileParser<E> 
 implements GraphCreator<E> {
 	
 	protected E edge;

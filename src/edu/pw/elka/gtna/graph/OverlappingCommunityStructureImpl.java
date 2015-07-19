@@ -5,6 +5,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import edu.pw.elka.gtna.graph.creator.interfaces.CommunityStructureCreator;
 import edu.pw.elka.gtna.graph.interfaces.Community;
 import edu.pw.elka.gtna.graph.interfaces.CommunityStructure;
 import edu.pw.elka.gtna.graph.interfaces.Edge;
@@ -35,6 +36,23 @@ public class OverlappingCommunityStructureImpl<N extends Node,E extends Edge<N>>
 			communities.add(C);
 		}
 	}
+	
+	public OverlappingCommunityStructureImpl(Graph<N, E> graph, CommunityStructureCreator<N> csc) {
+		super();
+		this.graph = graph;
+		this.communitiesLinkedListData = new LinkedHashMap<N,Set<Community<N>>>();	
+		this.communities = new LinkedHashSet<Community<N>>();
+		for (Community<N> C : csc){
+			for (N n: C) {
+				if (!communitiesLinkedListData.containsKey(n)) {
+					communitiesLinkedListData.put(n, new LinkedHashSet<Community<N>>());
+				}
+				communitiesLinkedListData.get(n).add(C);
+			}
+			communities.add(C);
+		}
+	}
+	
 
 	@Override
 	public Graph<N,E> getGraph() {
