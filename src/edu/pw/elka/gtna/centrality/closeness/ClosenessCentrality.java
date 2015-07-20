@@ -16,7 +16,7 @@ import edu.pw.elka.gtna.graph.interfaces.Node;
  * @author P.Szczepanski@ii.pw.edu.pl 
  *
  */
-abstract public class ClosenessCentrality<N extends Node> extends NodeCentrality<N,Edge<N>>{
+abstract public class ClosenessCentrality<N extends Node, E extends Edge<N>> extends NodeCentrality<N,E>{
 
 	
     Queue<N> queue; 
@@ -25,7 +25,7 @@ abstract public class ClosenessCentrality<N extends Node> extends NodeCentrality
 	/**
 	 * @param graph
 	 */
-	public ClosenessCentrality(Graph<N,Edge<N>> graph) {
+	public ClosenessCentrality(Graph<N,E> graph) {
 		super(graph);
         dist = new HashMap<N,Double>();
         queue = new LinkedList<N>();

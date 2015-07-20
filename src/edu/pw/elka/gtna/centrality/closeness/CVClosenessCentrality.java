@@ -94,7 +94,7 @@ public class CVClosenessCentrality<N extends Node, E extends Edge<N>> extends No
 
 	@Override
 	public void computeCentrality() {
-		MathFactors.precompute(graph.getNodesNumber());
+		MathFactors.precompute(graph.getNodesNumber()*communityStructure.size());
 		
 		Dijkstra<N,E> dikstra = new Dijkstra<N,E>(this.graph);
 		for (N source: graph.getNodes()){

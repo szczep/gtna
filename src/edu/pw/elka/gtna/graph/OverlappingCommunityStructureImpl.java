@@ -51,6 +51,13 @@ public class OverlappingCommunityStructureImpl<N extends Node,E extends Edge<N>>
 			}
 			communities.add(C);
 		}
+		for (N n: graph.getNodes()){
+			if (!communitiesLinkedListData.containsKey(n)) {
+				Community<N> C = new CommunityImpl(n);
+				communitiesLinkedListData.put(n, new LinkedHashSet<Community<N>>());
+				communities.add(C);
+			}
+		}
 	}
 	
 
