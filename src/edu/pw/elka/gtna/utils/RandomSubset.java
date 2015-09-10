@@ -16,12 +16,12 @@
 */
 package edu.pw.elka.gtna.utils;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 /**
@@ -41,6 +41,7 @@ public class RandomSubset<T> implements Iterable<Set<T>>, Iterator<Set<T>> {
 	
 	int size = 0;
 	
+	Random rand = new Random();
 
 	public RandomSubset(Collection<T> elements){
 		permutation.addAll(elements);
@@ -67,7 +68,8 @@ public class RandomSubset<T> implements Iterable<Set<T>>, Iterator<Set<T>> {
 		iterations++;
 		java.util.Collections.shuffle(permutation);
 		Set<T> subset = new LinkedHashSet<T>();
-		for (int i=0; i<size;i++){
+		int setSize = rand.nextInt(size)+1;
+		for (int i=0; i<setSize;i++){
 			subset.add(permutation.get(i));
 		}
 		return subset;

@@ -1,4 +1,4 @@
-package edu.pw.elka.gtna.ranking;
+package edu.pw.elka.gtna.centrality.utils;
 
 import java.util.ArrayList;
 import java.util.Collections;

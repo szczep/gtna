@@ -1,11 +1,11 @@
 package edu.pw.elka.gtna.graph.evaluator;
 
 
+import static edu.pw.elka.gtna.graph.interfaces.EdgeType.SIMPLE;
 import edu.pw.elka.gtna.graph.EdgeFactory;
 import edu.pw.elka.gtna.graph.interfaces.Edge;
 import edu.pw.elka.gtna.graph.interfaces.Graph;
 import edu.pw.elka.gtna.graph.interfaces.Node;
-import static edu.pw.elka.gtna.graph.interfaces.EdgeType.*;
 
 public class ClusteringCoefficientEvaluator<N extends Node,E extends Edge<N>> extends AbstractGraphEvaluator<N,E> {
 
@@ -16,35 +16,22 @@ public class ClusteringCoefficientEvaluator<N extends Node,E extends Edge<N>> ex
 	@Override
 	public double evaluate() {
 		
-		long closedTriples = 0;
-		long openTriples = 0;
+		double clustering = 0;
 		
-		for (N a: graph.getNodes()){
-			for (N b: graph.getNodes()){
-				if (!a.equals(b)){
-					for (N c: graph.getNodes()){
-						if (!a.equals(c) && !b.equals(c)){
-							if (graph.hasEdge((E) EdgeFactory.<N>newInstance(a, b, SIMPLE)) 
-									&& graph.hasEdge((E) EdgeFactory.<N>newInstance(a, c ,SIMPLE)) 
-									&& graph.hasEdge((E) EdgeFactory.<N>newInstance(b,c,SIMPLE))) {
-								closedTriples++;
-							}
-							
-							if ( (graph.hasEdge((E) EdgeFactory.<N>newInstance(a, b ,SIMPLE)) && 
-								  graph.hasEdge((E) EdgeFactory.<N>newInstance(a, c ,SIMPLE))   )  ||
-								  (graph.hasEdge((E) EdgeFactory.<N>newInstance(a, b ,SIMPLE)) &&
-								 (graph.hasEdge((E) EdgeFactory.<N>newInstance(b, c ,SIMPLE))))  || 
-								 (graph.hasEdge((E) EdgeFactory.<N>newInstance(a, c ,SIMPLE)) && 
-								 (graph.hasEdge((E) EdgeFactory.<N>newInstance(b, c ,SIMPLE))) ) ) {
-								openTriples++;	
-							}						
-						}
+		for (N v: graph.getNodes()){
+			double connectedPairs = 0;
+			for (N n1: graph.getNeighbours(v)){
+				for (N n2: graph.getNeighbours(v)){
+					if (graph.hasEdge((E) EdgeFactory.<N>newInstance(n1,n2,SIMPLE))){
+						connectedPairs++;
 					}
-				
+				}
+				if (graph.getDegree(v)>1){
+					clustering += connectedPairs/((graph.getDegree(v))*(graph.getDegree(v)-1));
 				}
 			}
 		}
-		return closedTriples/(double)openTriples;
+		return clustering/graph.getNodesNumber();
 	}
 
 }

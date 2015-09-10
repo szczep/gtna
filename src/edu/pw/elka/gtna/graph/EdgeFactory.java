@@ -21,11 +21,14 @@ public class EdgeFactory {
         switch(type)
         {
             case SIMPLE:
-            e = new EdgeImpl<N>();
-            break;
+	            e = new EdgeImpl<N>();
+	            break;
             case DIRECTED:
-            e = new DirectedEdgeImpl<N>();
-            break;
+	            e = new DirectedEdgeImpl<N>();
+	            break;
+            case WEIGHTED:
+                e = new WeightedEdgeImpl<N>();
+                break;
             default:
             ;
         }

@@ -42,6 +42,8 @@ public class MathFactors {
 	}
 	
 	public synchronized static double fac(int i){
+		if (POWERS == null || POWERS.length < i)
+			precompute(i+1);
 		return POWERS[i];
 	}
 	

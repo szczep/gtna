@@ -8,10 +8,8 @@ import java.util.concurrent.TimeUnit;
 
 import edu.pw.elka.gtna.centrality.betweenness.BetweennessCentrality;
 import edu.pw.elka.gtna.centrality.betweenness.SemivalueNodeBetweenness;
-import edu.pw.elka.gtna.centrality.closeness.ClosenessCentrality;
-import edu.pw.elka.gtna.centrality.degree.DegreeCentrality;
 import edu.pw.elka.gtna.centrality.interfaces.Centrality;
-import edu.pw.elka.gtna.centrality.utils.Ranking;
+import edu.pw.elka.gtna.centrality.utils.FeatureScalingNormalization;
 import edu.pw.elka.gtna.graph.GraphFactory;
 import edu.pw.elka.gtna.graph.creator.ScaleFreeGraphGenerator;
 import edu.pw.elka.gtna.graph.evaluator.ClusteringCoefficientEvaluator;
@@ -24,6 +22,7 @@ import edu.pw.elka.gtna.graph.interfaces.GraphEvaluator;
 import edu.pw.elka.gtna.graph.interfaces.GraphType;
 import edu.pw.elka.gtna.graph.interfaces.Node;
 import edu.pw.elka.gtna.utils.Agregator;
+import edu.pw.elka.gtna.utils.MathFactors;
 import edu.pw.elka.gtna.utils.RandomSubset;
 
 
@@ -32,7 +31,7 @@ import edu.pw.elka.gtna.utils.RandomSubset;
  * @author P.Szczepanski@ii.pw.edu.pl 
  *
  */
-public class RandomFailurePerformer extends AbstractTester {
+public class RandomFailurePerformerCardSVB extends AbstractTester {
 
 	/**
 	 * @param args
@@ -42,28 +41,38 @@ public class RandomFailurePerformer extends AbstractTester {
 		
 		
 		if (args.length < 7) {
-			System.out.println("Missing arguments: "+"GRAPH_SIZE, a, bStep, bLimit, iterations, threads, graphs");
+			System.out.println("Missing arguments: "+"GRAPH_SIZE, GRAPH_AVG_DEGREE, a, bStep, resources, iterations, threads, graphs");
 			return;
+		}
+		for (int i=0; i<args.length;i++ ){
+			System.out.println(i+": "+args[i]);
 		}
 
 	    final int graphSize = Integer.parseInt(args[0]) ;
-	    int a = Integer.parseInt(args[1]) ;
-	    final int bStep = Integer.parseInt(args[2]) ;
-	    final int bLimit = Integer.parseInt(args[3]) ;
-	    final int iterations = Integer.parseInt(args[4]) ;
-	    final int threads = Integer.parseInt(args[5]) ;
+	    final int graphDegree = Integer.parseInt(args[1]) ;
+	    int a = Integer.parseInt(args[2]) ;
+	    final int bStep = Integer.parseInt(args[3]) ;
+	    
+	    final double protectPer = Double.parseDouble(args[4]);
+	    
+	    final int iterations = Integer.parseInt(args[5]) ;
 	    final int graphs = Integer.parseInt(args[6]) ;
+	    final int threads = Integer.parseInt(args[7]) ;
 	    
-	    final Agregator[][] distancesB = new Agregator[6][graphSize+1];
-	    final Agregator[][] distancesSV = new Agregator[6][graphSize+1];
+
+	    final double bonus = protectPer*graphSize;
 	    
-	    final Agregator[][] distancesD = new Agregator[6][graphSize+1];
-	    final Agregator[][] distancesC = new Agregator[6][graphSize+1];
 	    
+	    
+	    final Agregator[][] distancesB = new Agregator[4][graphSize+1];
+	    final Agregator[][] distancesSV = new Agregator[4][graphSize+1];
+	    
+	    final Agregator[][] distancesD = new Agregator[4][graphSize+1];
+	    final Agregator[][] distancesC = new Agregator[4][graphSize+1];
 
 
 	    for (int i=0; i<=graphSize; i++){
-		    for (int j=0; j<6; j++){
+		    for (int j=0; j<4; j++){
 		    	distancesB[j][i]= new Agregator();
 		    	distancesSV[j][i]= new Agregator();
 		    	distancesD[j][i]= new Agregator();
@@ -79,28 +88,37 @@ public class RandomFailurePerformer extends AbstractTester {
 			//final int iterations = 5000;
 		
 			final Graph<Node,Edge<Node>> gr  = 
-					GraphFactory.<Node,Edge<Node>>newSimpleInstance(new ScaleFreeGraphGenerator(graphSize, (int)Math.sqrt(graphSize)), GraphType.SIMPLE);
+					GraphFactory.<Node,Edge<Node>>newSimpleInstance(new ScaleFreeGraphGenerator(graphSize, graphDegree), GraphType.SIMPLE);
 			
 
+											
 			
 			Centrality<Node> nB = new BetweennessCentrality<Node>(gr);
 			nB.computeCentrality();
-			final Ranking<Node> rB = new Ranking<Node>(nB);
+			final FeatureScalingNormalization<Node> NB = new FeatureScalingNormalization<Node>(nB);
 			
-			Centrality<Node> nD = new DegreeCentrality<Node>(gr);
-			nD.computeCentrality();
-			final Ranking<Node> rD = new Ranking<Node>(nD);
-			
-			Centrality<Node> nC = new ClosenessCentrality<Node,Edge<Node>>(gr){
+			final double pow2 = Math.pow(2.0, gr.getNodesNumber());
+	    	Centrality<Node> PB = new SemivalueNodeBetweenness<Node>(gr){
 				@Override
-				protected double fDistance(double d) {
-					if (d==0) return 0;
-					return 1/d;
-				}				
+				protected double distribution(int k){
+					return MathFactors.biNom(gr.getNodesNumber(),k)/pow2;
+				}
 			};
-			nC.computeCentrality();
-			final Ranking<Node> rC = new Ranking<Node>(nC);
 
+			PB.computeCentrality();
+			final FeatureScalingNormalization<Node> NPB = new FeatureScalingNormalization<Node>(PB);
+			
+	    	Centrality<Node> PSV = new SemivalueNodeBetweenness<Node>(gr){
+				@Override
+				protected double distribution(int k){
+					return 1.0/gr.getNodesNumber();
+				}
+			};
+
+			PSV.computeCentrality();
+			final FeatureScalingNormalization<Node> NPSV = new FeatureScalingNormalization<Node>(PSV);
+			
+			
 			
 			executorService = Executors.newFixedThreadPool(threads);
 		    final Semaphore available = new Semaphore(threads);
@@ -116,29 +134,41 @@ public class RandomFailurePerformer extends AbstractTester {
 				executorService.execute(new Runnable() {
 				    public void run() {
 		    	
-				    	Centrality<Node> PSV = new SemivalueNodeBetweenness<Node>(gr){
+				    	Centrality<Node> PSV2 = new SemivalueNodeBetweenness<Node>(gr){
 							@Override
 							protected double distribution(int k){
-								if (k>=a2 && k<b2)
-									return 1.0/(b2-a2);
+								if (k<=b2)
+									return 1.0/(b2);
 								else return 0.0;
 							}
 						};
 						
-						PSV.computeCentrality();
-						Ranking<Node> rPSV = new Ranking<Node>(PSV); 
+						PSV2.computeCentrality();
+						final FeatureScalingNormalization<Node> NPSV2 = new FeatureScalingNormalization<Node>(PSV2);
 						
-						//Ranking.displayRankings(r1, r2);
+						final double pow2 = Math.pow(2.0, gr.getNodesNumber()-1);
+				    	Centrality<Node> PB = new SemivalueNodeBetweenness<Node>(gr){
+							@Override
+							protected double distribution(int k){
+								return MathFactors.biNom(gr.getNodesNumber()-1,k)/pow2;
+							}
+						};
+
+						PB.computeCentrality();
+						final FeatureScalingNormalization<Node> NPB = new FeatureScalingNormalization<Node>(PB);
+						
+						
 						
 						double[] B	= new double[6];			
 						double[] SV	= new double[6];
-						double[] D	= new double[6];
+						double[] D	= new double[6];			
 						double[] C	= new double[6];
 				
 						
 						RandomSubset<Node> rs = new RandomSubset<Node>(gr.getNodes());
 						rs.setIterationsLimitation(iterations);
-						rs.setSize(rand.nextInt((b2-a2))+a2);
+						//rs.setSize(rand.nextInt((b2-a2))+a2);
+						rs.setSize(b2);
 						int i = 0;
 						for(Set<Node> failers: rs){ i++;
 							//System.out.println(i+"/"+1000+" "+nf.format(Bdist/(i-1))+" vs "+nf.format(SVdist/(i-1))+"      "+nf.format(Bpaths/(i-1))+" vs "+nf.format(SVpaths/(i-1))); i++;
@@ -149,23 +179,38 @@ public class RandomFailurePerformer extends AbstractTester {
 							final Graph<Node,Edge<Node>> grSV  = 
 									GraphFactory.<Node,Edge<Node>>newSimpleInstance(GraphType.SIMPLE);
 
+							final Graph<Node,Edge<Node>> grBa  = 
+									GraphFactory.<Node,Edge<Node>>newSimpleInstance(GraphType.SIMPLE);
+							
+							final Graph<Node,Edge<Node>> grPSV  = 
+									GraphFactory.<Node,Edge<Node>>newSimpleInstance(GraphType.SIMPLE);
 							
 							
 							for (Edge<Node> e : gr.getEdges()){
 								grB.addEdge(e);
 								grSV.addEdge(e);
+								grBa.addEdge(e);
+								grPSV.addEdge(e);
 							}
 							
 							for(Node node: failers){
-								if ( (((double)rB.getPosition(node))/(gr.getNodesNumber())) > rand.nextDouble() ) {
+									
+								double randD =  rand.nextDouble();
+								if (NB.getNormCentrality(node)*bonus < randD ) {
 									grB.removeEdges(node);
 								}
 								
-								if ( ( (((double)rPSV.getPosition(node))/(gr.getNodesNumber())) > rand.nextDouble() ) ){
+								if (NPSV.getNormCentrality(node)*bonus < randD  ) {
 									grSV.removeEdges(node);
 								}
+
+								if (NPB.getNormCentrality(node)*bonus < randD  ) {
+									grBa.removeEdges(node);
+								}
 								
-															
+								if (NPSV2.getNormCentrality(node)*bonus < randD  ) {
+									grPSV.removeEdges(node);
+								}
 								
 //								if (rB.getPosition(node) > graphSize*0.2){
 //									grB.removeEdges(node);
@@ -198,14 +243,36 @@ public class RandomFailurePerformer extends AbstractTester {
 							SV[2] += IGMEvaluatorSV.evaluate();
 							SV[3] += largestComponentSV.evaluate();
 							
-
+							GraphEvaluator clusteringCoefficientBa = new ClusteringCoefficientEvaluator<Node,Edge<Node>>(grBa);
+							GraphEvaluator fragmentationRatioBa = new FragmentationRatioEvaluator<Node,Edge<Node>>(grBa);
+							GraphEvaluator IGMEvaluatorBa = new IGMEvaluator<Node,Edge<Node>>(grBa);
+							GraphEvaluator largestComponentBa = new LargestComponentEvaluator<Node,Edge<Node>>(grBa);
 							
+							
+							D[0] += clusteringCoefficientBa.evaluate();
+							D[1] += fragmentationRatioBa.evaluate();
+							D[2] += IGMEvaluatorBa.evaluate();
+							D[3] += largestComponentBa.evaluate();
+							
+							GraphEvaluator clusteringCoefficientPSV = new ClusteringCoefficientEvaluator<Node,Edge<Node>>(grPSV);
+							GraphEvaluator fragmentationRatioPSV = new FragmentationRatioEvaluator<Node,Edge<Node>>(grPSV);
+							GraphEvaluator IGMEvaluatorPSV = new IGMEvaluator<Node,Edge<Node>>(grPSV);
+							GraphEvaluator largestComponentPSV = new LargestComponentEvaluator<Node,Edge<Node>>(grPSV);
+							
+							
+							C[0] += clusteringCoefficientPSV.evaluate();
+							C[1] += fragmentationRatioPSV.evaluate();
+							C[2] += IGMEvaluatorPSV.evaluate();
+							C[3] += largestComponentPSV.evaluate();
+
 						}
 						//System.out.println("("+a+","+b2+") "+nf.format(Bdist/iterations)+" vs "+nf.format(SVdist/iterations)+"      "+nf.format(Bpaths/iterations)+" vs "+nf.format(SVpaths/iterations));
 						
-						for (int j=0; j<6; j++){
+						for (int j=0; j<4; j++){
 							distancesB[j][b2].observe(B[j]/iterations);
 							distancesSV[j][b2].observe(SV[j]/iterations);
+							distancesD[j][b2].observe(D[j]/iterations);
+							distancesC[j][b2].observe(C[j]/iterations);
 						}
 						available.release();
 				    }
@@ -230,7 +297,9 @@ public class RandomFailurePerformer extends AbstractTester {
 			System.out.print(i1+" ");
 			for (int j=0; j<4; j++){
 				System.out.print(sixDForm.format(distancesB[j][i1].getMean())+" "+sixDForm.format(distancesB[j][i1].getLowerBound(75))+" "+sixDForm.format(distancesB[j][i1].getUpperBound(75)) +
-						" "+sixDForm.format(distancesSV[j][i1].getMean())+" "+sixDForm.format(distancesSV[j][i1].getLowerBound(75))+" "+sixDForm.format(distancesSV[j][i1].getUpperBound(75))+" ");
+						" "+sixDForm.format(distancesSV[j][i1].getMean())+" "+sixDForm.format(distancesSV[j][i1].getLowerBound(75))+" "+sixDForm.format(distancesSV[j][i1].getUpperBound(75))+
+						" "+sixDForm.format(distancesD[j][i1].getMean())+" "+sixDForm.format(distancesD[j][i1].getLowerBound(75))+" "+sixDForm.format(distancesD[j][i1].getUpperBound(75))+
+						" "+sixDForm.format(distancesC[j][i1].getMean())+" "+sixDForm.format(distancesC[j][i1].getLowerBound(75))+" "+sixDForm.format(distancesC[j][i1].getUpperBound(75))+" ");
 
 			}				System.out.println();
 

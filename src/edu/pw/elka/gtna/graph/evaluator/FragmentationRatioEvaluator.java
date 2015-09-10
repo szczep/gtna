@@ -20,7 +20,7 @@ public class FragmentationRatioEvaluator<N extends Node,E extends Edge<N>> exten
 		
 		fc.compute();
 				
-		return 1/fc.getComponents().size();
+		return 1.0/fc.getComponents().size();
 		
 	}
 }

@@ -2,6 +2,8 @@ package edu.pw.elka.gtna.graph;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -142,8 +144,11 @@ public class GraphLinkedListImpl<N extends Node,E extends Edge<N>> implements Gr
 
 	@Override
 	public boolean removeEdges(N n) {
-		if (graphLinkedListData.containsKey(n)){
-			graphLinkedListData.get(n).clear();
+		if (graphLinkedListData.containsKey(n)){		
+			List<E> copyEdges = new LinkedList<E>(graphLinkedListData.get(n));
+			for (E e: copyEdges) {
+				removeEdge(e);
+			}
 			return true;
 		}
 		return false;
@@ -173,6 +178,7 @@ public class GraphLinkedListImpl<N extends Node,E extends Edge<N>> implements Gr
 	public int getWeight(N n1, N n2) {
 		return 1;
 	}
+
 
 
 	@Override
